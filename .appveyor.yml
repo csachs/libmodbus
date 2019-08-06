@@ -7,33 +7,45 @@ clone_depth: 1
 
 before_build:
   - cmd: env
-  # cygwin
-  - cmd: cd C:\projects\libmodbus
-  - cmd: if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
-  - cmd: if %PLATFORM%==Win32 (set CYGWIN_SETUP=setup-x86.exe) else (set CYGWIN_SETUP=setup-x86_64.exe)
-  - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
-  - cmd: cmd.exe /c %CYGWIN_ROOT%\%CYGWIN_SETUP% -q -P psmisc
-  # msvc
-  - cmd: cd C:\projects\libmodbus\src\win32
-  - cmd: cscript.exe configure.js
-  - cmd: curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\msvc-stdint.h
+  - cmd: >
+      if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" (
+        cd C:\projects\libmodbus\src\win32
+        cscript.exe configure.js
+        curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
+      ) else (
+        cd C:\projects\libmodbus
+        if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
+        if %PLATFORM%==Win32 (set CYGWIN_SETUP=setup-x86.exe) else (set CYGWIN_SETUP=setup-x86_64.exe)
+        set PATH=%CYGWIN_ROOT%\bin;%PATH%
+      )
 
 platform:
   - Win32
   - x64
 
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2017
+
+  platform:
+    - cygwin
+    - cygwin64
+
 configuration: Release
 
 build_script:
-  # cygwin
-  - cmd: cd C:\projects\libmodbus
-  - cmd: bash autogen.sh
-  - cmd: bash configure
-  - cmd: bash -c 'make'
-  # msvc
-  - cmd: cd C:\projects\libmodbus\src\win32
-  - cmd: rename ..\msvc-stdint.h stdint.h
-  - cmd: C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
+  - cmd: >
+      if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" (
+        cd C:\projects\libmodbus\src\win32
+        C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
+      ) else (
+        cd C:\projects\libmodbus
+        bash autogen.sh
+        bash configure
+        bash -c 'make'
+      )
 
 test_script:
   # cygwin
