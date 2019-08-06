@@ -7,7 +7,9 @@ before_build:
   # cygwin
   - cmd: cd C:\projects\libmodbus
   - cmd: if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
+  - cmd: if %PLATFORM%==Win32 (set CYGWIN_SETUP=setup-x86.exe) else (set CYGWIN_SETUP=setup-x86_64.exe)
   - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
+  - cmd: %CYGWIN_ROOT%\%CYGWIN_SETUP% -q -P psmisc
   # msvc
   - cmd: cd C:\projects\libmodbus\src\win32
   - cmd: cscript.exe configure.js
