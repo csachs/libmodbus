@@ -53,15 +53,17 @@ test_script:
       if($env:PLATFORM -like "cygwin*") {
         cd $env:APPVEYOR_BUILD_FOLDER
         bash -c 'make check'
+        echo "check was run"
       }
 
 after_build:
   - ps: >-
+      cd $env:APPVEYOR_BUILD_FOLDER\src
+
       if($env:PLATFORM -like "cygwin*") {
-        cd $env:APPVEYOR_BUILD_FOLDER
         7z `
         a `
-        modbus.zip `
+        ..\modbus.zip `
         modbus.h `
         modbus-version.h `
         modbus-tcp.h `
@@ -70,19 +72,18 @@ after_build:
         .\.libs\libmodbus.dll.a `
         .\.libs\libmodbus.lai `
       } else {
-        cd $env:APPVEYOR_BUILD_FOLDER\src\win32
         7z `
         a `
-        ..\..\modbus.zip `
-        ..\stdint.h `
-        ..\modbus.h `
-        ..\modbus-version.h `
-        ..\modbus-tcp.h `
-        ..\modbus-rtu.h `
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.dll" `
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.exp" `
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.lib" `
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb"
+        ..\modbus.zip `
+        stdint.h `
+        modbus.h `
+        modbus-version.h `
+        modbus-tcp.h `
+        modbus-rtu.h `
+        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.dll" `
+        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.exp" `
+        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.lib" `
+        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb"
       }
 
 artifacts:
