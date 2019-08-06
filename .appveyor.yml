@@ -8,7 +8,8 @@ before_build:
   - cmd: cd C:\projects\libmodbus
   - cmd: if %PLATFORM%==Win32 set CYGWIN_ROOT=C:\cygwin64 else set CYGWIN_ROOT=C:\cygwin
   - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
-  - cmd: bash -c 'ln -s /bin/autoreconf /bin/autoreconf-2.69'
+  - cmd: bash -c 'ls /bin'
+  - cmd: bash -c 'ln -s /bin/autoreconf-2.69 /bin/autoreconf'
   # msvc
   - cmd: cd C:\projects\libmodbus\src\win32
   - cmd: cscript.exe configure.js
