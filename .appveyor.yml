@@ -1,24 +1,50 @@
-## Operating System (VM environment) ##
-platform: x64
-image: Visual Studio 2017
+version: 3.1.6-{build}
 
-## Install Script ##
-install:
-  - set CYGWIN_ROOT=C:\cygwin64
-  - set PATH=%CYGWIN_ROOT%\bin;%PATH%
-  - bash --version
-  - bash -c 'autoreconf --version'
-  - bash -c 'make --version'
+image: Visual Studio 2013
+clone_depth: 1
 
-## Disable MSBuild (default) ##
-build: off
+before_build:
+  # cygwin
+  - cmd: if %PLATFORM%==Win32 set CYGWIN_ROOT=C:\cygwin64 else set CYGWIN_ROOT=C:\cygwin
+  - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
+  # msvc
+  - cmd: cd C:\projects\libmodbus\src\win32
+  - cmd: cscript.exe configure.js
+  - cmd: curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
 
-## Build Script ##
+platform:
+  - Win32
+  - x64
+
+configuration: Release
+
+# the normal build way uses a too new msbuild which fails with the current files
 build_script:
-  - bash autogen.sh
-  - bash configure
-  - bash -c 'make'
+  # cygwin
+  - cmd: bash autogen.sh
+  - cmd: bash configure
+  - cmd: bash -c 'make'
+  # msvc
+  - cmd: C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
 
-## Test Script ##
 test_script:
-  - bash -c 'make check'
+  - cmd: bash -c 'make check'
+
+after_build:
+  - cmd: >
+      7z
+      a
+      modbus.zip
+      ..\stdint.h
+      ..\modbus.h
+      ..\modbus-version.h
+      ..\modbus-tcp.h
+      ..\modbus-rtu.h
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.dll"
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.exp"
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.lib"
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.pdb"
+  - cmd: dir /s C:\projects\libmodbus
+
+artifacts:
+  - path: src\win32\modbus.zip
