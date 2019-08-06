@@ -6,16 +6,18 @@ image:
 clone_depth: 1
 
 before_build:
-  - cmd: env
   - cmd: >
-      if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" (
+      if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
         cd C:\projects\libmodbus\src\win32
         cscript.exe configure.js
         curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
       ) else (
         cd C:\projects\libmodbus
-        if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
-        if %PLATFORM%==Win32 (set CYGWIN_SETUP=setup-x86.exe) else (set CYGWIN_SETUP=setup-x86_64.exe)
+        if "%PLATFORM%"=="cygwin" (
+          set CYGWIN_ROOT=C:\cygwin
+        ) else (
+          set CYGWIN_ROOT=C:\cygwin64
+        )
         set PATH=%CYGWIN_ROOT%\bin;%PATH%
       )
 
@@ -36,12 +38,11 @@ matrix:
     - image: Visual Studio 2017
       platform: x64
 
-
 configuration: Release
 
 build_script:
   - cmd: >
-      if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" (
+      if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
         cd C:\projects\libmodbus\src\win32
         C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
       ) else (
@@ -58,21 +59,34 @@ test_script:
   - cmd: bash -c 'make check; cat tests/test-suite.log'
 
 after_build:
-  - cmd: cd C:\projects\libmodbus\src\win32
   - cmd: >
-      7z
-      a
-      modbus.zip
-      ..\stdint.h
-      ..\modbus.h
-      ..\modbus-version.h
-      ..\modbus-tcp.h
-      ..\modbus-rtu.h
-      ".\%PLATFORM%\%CONFIGURATION%\modbus.dll"
-      ".\%PLATFORM%\%CONFIGURATION%\modbus.exp"
-      ".\%PLATFORM%\%CONFIGURATION%\modbus.lib"
-      ".\%PLATFORM%\%CONFIGURATION%\modbus.pdb"
-  - cmd: dir /s C:\projects\libmodbus
+      if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
+        cd C:\projects\libmodbus\src\win32
+        7z
+        a
+        ..\..\modbus.zip
+        ..\stdint.h
+        ..\modbus.h
+        ..\modbus-version.h
+        ..\modbus-tcp.h
+        ..\modbus-rtu.h
+        ".\%PLATFORM%\%CONFIGURATION%\modbus.dll"
+        ".\%PLATFORM%\%CONFIGURATION%\modbus.exp"
+        ".\%PLATFORM%\%CONFIGURATION%\modbus.lib"
+        ".\%PLATFORM%\%CONFIGURATION%\modbus.pdb"
+      ) else (
+        cd C:\projects\libmodbus
+        7z
+        a
+        modbus.zip
+        modbus.h
+        modbus-version.h
+        modbus-tcp.h
+        modbus-rtu.h
+        .\.libs\cygmodbus-5.dll
+        .\.libs\libmodbus.dll.a
+        .\.libs\libmodbus.lai
+      )
 
 artifacts:
-  - path: src\win32\modbus.zip
+  - path: modbus.zip
