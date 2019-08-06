@@ -1,28 +1,59 @@
-## Operating System (VM environment) ##
-platform: x64
-image: Visual Studio 2013
+version: 3.1.6-{build}
 
-## Install Script ##
-install:
-  - set CYGWIN_ROOT=C:\cygwin64
-  - set PATH=%CYGWIN_ROOT%\bin;%PATH%
-  - bash --version
-  - bash -c 'autoreconf --version'
-  - bash -c 'make --version'
+image: Visual Studio 2017
+clone_depth: 1
 
-## Disable MSBuild (default) ##
-build: off
+before_build:
+  # cygwin
+  - cmd: cd C:\projects\libmodbus
+  - cmd: if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
+  - cmd: if %PLATFORM%==Win32 (set CYGWIN_SETUP=setup-x86.exe) else (set CYGWIN_SETUP=setup-x86_64.exe)
+  - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
+  - cmd: cmd.exe /c %CYGWIN_ROOT%\%CYGWIN_SETUP% -q -P psmisc
+  # msvc
+  - cmd: cd C:\projects\libmodbus\src\win32
+  - cmd: cscript.exe configure.js
+  - cmd: curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\msvc-stdint.h
 
-## Build Script ##
+platform:
+  - Win32
+  - x64
+
+configuration: Release
+
 build_script:
-  - bash autogen.sh
-  - bash configure
-  - bash -c 'make'
+  # cygwin
+  - cmd: cd C:\projects\libmodbus
+  - cmd: bash autogen.sh
+  - cmd: bash configure
+  - cmd: bash -c 'make'
+  # msvc
+  - cmd: cd C:\projects\libmodbus\src\win32
+  - cmd: rename ..\msvc-stdint.h stdint.h
+  - cmd: C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
 
-## Test Script ##
 test_script:
-  - bash -c 'make check'
-  - cmd: bash -c 'tar czf result.tar *'
+  # cygwin
+  - cmd: cd C:\projects\libmodbus
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - cmd: bash -c 'make check; cat tests/test-suite.log'
+
+after_build:
+  - cmd: cd C:\projects\libmodbus\src\win32
+  - cmd: >
+      7z
+      a
+      modbus.zip
+      ..\stdint.h
+      ..\modbus.h
+      ..\modbus-version.h
+      ..\modbus-tcp.h
+      ..\modbus-rtu.h
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.dll"
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.exp"
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.lib"
+      ".\%PLATFORM%\%CONFIGURATION%\modbus.pdb"
+  - cmd: dir /s C:\projects\libmodbus
 
 artifacts:
-  - path: result.tar
+  - path: src\win32\modbus.zip
