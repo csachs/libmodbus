@@ -29,7 +29,13 @@ matrix:
   exclude:
     - image: Visual Studio 2013
       platform: cygwin
-#        - cygwin64
+    - image: Visual Studio 2013
+      platform: cygwin64
+    - image: Visual Studio 2017
+      platform: Win32
+    - image: Visual Studio 2017
+      platform: x64
+
 
 configuration: Release
 
