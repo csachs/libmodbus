@@ -22,16 +22,15 @@ before_build:
 platform:
   - Win32
   - x64
+  - cygwin
+  - cygwin64
 
-for:
--
-  matrix:
-    only:
-      - image: Visual Studio 2017
-
-  platform:
-    - cygwin
-    - cygwin64
+matrix:
+  exclude:
+    - image: Visual Studio 2013
+      platform:
+        - cygwin
+        - cygwin64
 
 configuration: Release
 
