@@ -7,23 +7,20 @@ clone_depth: 1
 
 
 before_build:
-  - cmd: |
-      echo "a"
-      echo "b"
-  - cmd: |
-      if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
+  - ps: >-
+      if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
         cd C:\projects\libmodbus\src\win32
         cscript.exe configure.js
         curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
-      ) else (
+      } else {
         cd C:\projects\libmodbus
-        if "%PLATFORM%"=="cygwin" (
-          set CYGWIN_ROOT=C:\cygwin
-        ) else (
-          set CYGWIN_ROOT=C:\cygwin64
-        )
-        set PATH=%CYGWIN_ROOT%\bin;%PATH%
-      )
+        if($env:PLATFORM -Match "cygwin") {
+          $env:CYGWIN_ROOT="C:\cygwin"
+        } else {
+          $env:CYGWIN_ROOT="C:\cygwin"
+        }
+        $env:PATH="$env:CYGWIN_ROOT\bin;$env:PATH"
+      }
 
 platform:
   - Win32
