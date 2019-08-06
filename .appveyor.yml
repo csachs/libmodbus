@@ -8,18 +8,13 @@ clone_depth: 1
 
 before_build:
   - ps: >-
-      if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
+      if($env:PLATFORM -like "cygwin*") {
+        $env:CYGWIN_ROOT="C:\$env:PLATFORM"
+        $env:PATH="$env:CYGWIN_ROOT\bin;$env:PATH"
+      } else {
         cd C:\projects\libmodbus\src\win32
         cscript.exe configure.js
         curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o ..\stdint.h
-      } else {
-        cd C:\projects\libmodbus
-        if($env:PLATFORM -Match "cygwin") {
-          $env:CYGWIN_ROOT="C:\cygwin"
-        } else {
-          $env:CYGWIN_ROOT="C:\cygwin"
-        }
-        $env:PATH="$env:CYGWIN_ROOT\bin;$env:PATH"
       }
 
 platform:
@@ -43,26 +38,39 @@ configuration: Release
 
 build_script:
   - ps: >-
-      if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
-        cd C:\projects\libmodbus\src\win32
-        C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "$env:APPVEYOR_BUILD_FOLDER\src\win32\modbus.vcproj" "/p:Configuration=$env:CONFIGURATION" "/p:Platform=$env:PLATFORM"
-      } else {
-        cd C:\projects\libmodbus
+      if($env:PLATFORM -like "cygwin*") {
+        cd $env:APPVEYOR_BUILD_FOLDER
         bash autogen.sh
         bash configure
         bash -c 'make'
+      } else {
+        cd $env:APPVEYOR_BUILD_FOLDER\src\win32
+        C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "$env:APPVEYOR_BUILD_FOLDER\src\win32\modbus.vcproj" "/p:Configuration=$env:CONFIGURATION" "/p:Platform=$env:PLATFORM"
       }
 
 test_script:
-  # cygwin
-  - cmd: cd C:\projects\libmodbus
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-  - cmd: bash -c 'make check; cat tests/test-suite.log'
+  - ps: >-
+      if($env:PLATFORM -like "cygwin*") {
+        cd $env:APPVEYOR_BUILD_FOLDER
+        bash -c 'make check'
+      }
 
 after_build:
   - ps: >-
-      if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
-        cd C:\projects\libmodbus\src\win32
+      if($env:PLATFORM -like "cygwin*") {
+        cd $env:APPVEYOR_BUILD_FOLDER
+        7z `
+        a `
+        modbus.zip `
+        modbus.h `
+        modbus-version.h `
+        modbus-tcp.h `
+        modbus-rtu.h `
+        .\.libs\cygmodbus-5.dll `
+        .\.libs\libmodbus.dll.a `
+        .\.libs\libmodbus.lai `
+      } else {
+        cd $env:APPVEYOR_BUILD_FOLDER\src\win32
         7z `
         a `
         ..\..\modbus.zip `
@@ -75,18 +83,6 @@ after_build:
         ".\$env:PLATFORM\$env:CONFIGURATION\modbus.exp" `
         ".\$env:PLATFORM\$env:CONFIGURATION\modbus.lib" `
         ".\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb"
-      } else {
-        cd C:\projects\libmodbus
-        7z `
-        a `
-        modbus.zip `
-        modbus.h `
-        modbus-version.h `
-        modbus-tcp.h `
-        modbus-rtu.h `
-        .\.libs\cygmodbus-5.dll `
-        .\.libs\libmodbus.dll.a `
-        .\.libs\libmodbus.lai `
       }
 
 artifacts:
