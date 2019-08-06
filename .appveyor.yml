@@ -7,18 +7,31 @@ clone_depth: 1
 
 before_build:
   - cmd: >-
+
       if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
+
         cd C:\projects\libmodbus\src\win32
+
         cscript.exe configure.js
+      
         curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
+
       ) else (
+
         cd C:\projects\libmodbus
+
         if "%PLATFORM%"=="cygwin" (
+
           set CYGWIN_ROOT=C:\cygwin
+
         ) else (
+
           set CYGWIN_ROOT=C:\cygwin64
+
         )
+
         set PATH=%CYGWIN_ROOT%\bin;%PATH%
+
       )
 
 platform:
