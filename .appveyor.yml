@@ -60,31 +60,24 @@ after_build:
   - ps: >-
       cd $env:APPVEYOR_BUILD_FOLDER\src
 
+      mkdir ..\archive
+      copy modbus.h modbus-version.h modbus-tcp.h modbus-rtu.h ..\archive
+
       if($env:PLATFORM -like "cygwin*") {
-        7z `
-        a `
-        ..\modbus.zip `
-        modbus.h `
-        modbus-version.h `
-        modbus-tcp.h `
-        modbus-rtu.h `
-        .\.libs\cygmodbus-5.dll `
-        .\.libs\libmodbus.dll.a `
-        .\.libs\libmodbus.lai `
+        copy .\.libs\cygmodbus-5.dll .\.libs\libmodbus.dll.a ..\archive
+        copy .\.libs\libmodbus.lai ..\archive\libmodbus.la
       } else {
-        7z `
-        a `
-        ..\modbus.zip `
-        stdint.h `
-        modbus.h `
-        modbus-version.h `
-        modbus-tcp.h `
-        modbus-rtu.h `
-        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.dll" `
-        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.exp" `
-        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.lib" `
-        "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb"
+        copy stdint.h ..\archive
+        copy "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.dll" `
+             "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.exp" `
+             "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.lib" `
+             "win32\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb" `
+             ..\archive
       }
 
+      cd ..\archive
+      $artifactName = "modbus_" + $env:PLATFORM.ToLower() + ".zip"
+      7z a ..\$artifactName *
+
 artifacts:
-  - path: modbus.zip
+  - path: '*.zip'
