@@ -5,6 +5,7 @@ image:
   - Visual Studio 2017
 clone_depth: 1
 
+
 before_build:
   - cmd: >
       echo "a"
