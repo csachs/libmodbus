@@ -63,30 +63,30 @@ after_build:
   - ps: >-
       if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
         cd C:\projects\libmodbus\src\win32
-        7z
-        a
-        ..\..\modbus.zip
-        ..\stdint.h
-        ..\modbus.h
-        ..\modbus-version.h
-        ..\modbus-tcp.h
-        ..\modbus-rtu.h
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.dll"
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.exp"
-        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.lib"
+        7z `
+        a `
+        ..\..\modbus.zip `
+        ..\stdint.h `
+        ..\modbus.h `
+        ..\modbus-version.h `
+        ..\modbus-tcp.h `
+        ..\modbus-rtu.h `
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.dll" `
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.exp" `
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.lib" `
         ".\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb"
       } else {
         cd C:\projects\libmodbus
-        7z
-        a
-        modbus.zip
-        modbus.h
-        modbus-version.h
-        modbus-tcp.h
-        modbus-rtu.h
-        .\.libs\cygmodbus-5.dll
-        .\.libs\libmodbus.dll.a
-        .\.libs\libmodbus.lai
+        7z `
+        a `
+        modbus.zip `
+        modbus.h `
+        modbus-version.h `
+        modbus-tcp.h `
+        modbus-rtu.h `
+        .\.libs\cygmodbus-5.dll `
+        .\.libs\libmodbus.dll.a `
+        .\.libs\libmodbus.lai `
       }
 
 artifacts:
