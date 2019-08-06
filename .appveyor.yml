@@ -33,7 +33,7 @@ build_script:
 test_script:
   # cygwin
   - cmd: cd C:\projects\libmodbus
-  - cmd: bash -c 'make check'
+  - cmd: bash -c 'make check; cat tests/test-suite.log'
 
 after_build:
   - cmd: cd C:\projects\libmodbus\src\win32
