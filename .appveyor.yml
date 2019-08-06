@@ -6,11 +6,8 @@ clone_depth: 1
 before_build:
   # cygwin
   - cmd: cd C:\projects\libmodbus
-  - cmd: if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin64) else (set CYGWIN_ROOT=C:\cygwin)
+  - cmd: if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
   - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
-  - cmd: echo %PATH%
-  - cmd: bash -c 'ls /bin'
-  - cmd: bash -c 'ln -s /bin/autoreconf-2.69 /bin/autoreconf'
   # msvc
   - cmd: cd C:\projects\libmodbus\src\win32
   - cmd: cscript.exe configure.js
@@ -22,7 +19,6 @@ platform:
 
 configuration: Release
 
-# the normal build way uses a too new msbuild which fails with the current files
 build_script:
   # cygwin
   - cmd: cd C:\projects\libmodbus
@@ -34,6 +30,8 @@ build_script:
   - cmd: C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
 
 test_script:
+  # cygwin
+  - cmd: cd C:\projects\libmodbus
   - cmd: bash -c 'make check'
 
 after_build:
