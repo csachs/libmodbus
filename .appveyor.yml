@@ -11,7 +11,7 @@ before_build:
       if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
         cd C:\projects\libmodbus\src\win32
         cscript.exe configure.js
-        curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
+        curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o ..\stdint.h
       } else {
         cd C:\projects\libmodbus
         if($env:PLATFORM -Match "cygwin") {
