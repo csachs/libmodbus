@@ -6,7 +6,7 @@ clone_depth: 1
 before_build:
   # cygwin
   - cmd: cd C:\projects\libmodbus
-  - cmd: if %PLATFORM%==Win32 set CYGWIN_ROOT=C:\cygwin64 else set CYGWIN_ROOT=C:\cygwin
+  - cmd: if %PLATFORM%==Win32 ( set CYGWIN_ROOT=C:\cygwin64 ) else ( set CYGWIN_ROOT=C:\cygwin )
   - cmd: set PATH=%CYGWIN_ROOT%\bin;%PATH%
   - cmd: echo %PATH%
   - cmd: bash -c 'ls /bin'
