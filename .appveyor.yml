@@ -1,9 +1,12 @@
 version: 3.1.6-{build}
 
-image: Visual Studio 2017
+image:
+  - Visual Studio 2013
+  - Visual Studio 2017
 clone_depth: 1
 
 before_build:
+  - cmd: env
   # cygwin
   - cmd: cd C:\projects\libmodbus
   - cmd: if %PLATFORM%==Win32 (set CYGWIN_ROOT=C:\cygwin) else (set CYGWIN_ROOT=C:\cygwin64)
