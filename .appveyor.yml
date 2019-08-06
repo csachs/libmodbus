@@ -42,16 +42,16 @@ matrix:
 configuration: Release
 
 build_script:
-  - cmd: >
-      if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
+  - ps: >-
+      if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
         cd C:\projects\libmodbus\src\win32
-        C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
-      ) else (
+        C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "$env:APPVEYOR_BUILD_FOLDER\src\win32\modbus.vcproj" "/p:Configuration=$env:CONFIGURATION" "/p:Platform=$env:PLATFORM"
+      } else {
         cd C:\projects\libmodbus
         bash autogen.sh
         bash configure
         bash -c 'make'
-      )
+      }
 
 test_script:
   # cygwin
@@ -60,8 +60,8 @@ test_script:
   - cmd: bash -c 'make check; cat tests/test-suite.log'
 
 after_build:
-  - cmd: >
-      if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
+  - ps: >-
+      if($env:APPVEYOR_BUILD_WORKER_IMAGE -Match "Visual Studio 2013") {
         cd C:\projects\libmodbus\src\win32
         7z
         a
@@ -71,11 +71,11 @@ after_build:
         ..\modbus-version.h
         ..\modbus-tcp.h
         ..\modbus-rtu.h
-        ".\%PLATFORM%\%CONFIGURATION%\modbus.dll"
-        ".\%PLATFORM%\%CONFIGURATION%\modbus.exp"
-        ".\%PLATFORM%\%CONFIGURATION%\modbus.lib"
-        ".\%PLATFORM%\%CONFIGURATION%\modbus.pdb"
-      ) else (
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.dll"
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.exp"
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.lib"
+        ".\$env:PLATFORM\$env:CONFIGURATION\modbus.pdb"
+      } else {
         cd C:\projects\libmodbus
         7z
         a
@@ -87,7 +87,7 @@ after_build:
         .\.libs\cygmodbus-5.dll
         .\.libs\libmodbus.dll.a
         .\.libs\libmodbus.lai
-      )
+      }
 
 artifacts:
   - path: modbus.zip
