@@ -28,9 +28,8 @@ platform:
 matrix:
   exclude:
     - image: Visual Studio 2013
-      platform:
-        - cygwin
-        - cygwin64
+    - platform: cygwin
+#        - cygwin64
 
 configuration: Release
 
