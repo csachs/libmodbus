@@ -22,9 +22,6 @@ build_script:
 ## Test Script ##
 test_script:
   - bash -c 'make check'
-
-
-after_build:
   - cmd: bash -c 'tar czf result.tar *'
 
 artifacts:
