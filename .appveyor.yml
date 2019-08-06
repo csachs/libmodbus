@@ -7,6 +7,9 @@ clone_depth: 1
 
 before_build:
   - cmd: >
+      echo "a"
+      echo "b"
+  - cmd: >
       if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2013" (
         cd C:\projects\libmodbus\src\win32 &&
         cscript.exe configure.js &&
