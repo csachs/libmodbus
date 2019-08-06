@@ -11,7 +11,7 @@ before_build:
   # msvc
   - cmd: cd C:\projects\libmodbus\src\win32
   - cmd: cscript.exe configure.js
-  - cmd: curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\stdint.h
+  - cmd: curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h > ..\msvc-stdint.h
 
 platform:
   - Win32
@@ -27,6 +27,7 @@ build_script:
   - cmd: bash -c 'make'
   # msvc
   - cmd: cd C:\projects\libmodbus\src\win32
+  - cmd: rename ..\msvc-stdint.h stdint.h
   - cmd: C:\WINDOWS\Microsoft.NET\Framework\v3.5\msbuild.exe "%APPVEYOR_BUILD_FOLDER%\src\win32\modbus.vcproj" "/p:Configuration=%CONFIGURATION%" "/p:Platform=%PLATFORM%"
 
 test_script:
